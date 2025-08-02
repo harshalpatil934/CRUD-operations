@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillShelf</title>
+</head>
+<body>
+    all courses
+    <form action="/courses/new" method="get">
+        <button>add course</button>
+    </form>
+    <ul>
+    <% for (let course of allcourse){%>
+        <li><a href="/courses/<%=course._id%>"><%=course.name%></a></li>
+ 
+    <%}%>
+    
+</body>
+</html>
