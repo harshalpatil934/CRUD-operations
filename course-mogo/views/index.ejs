@@ -1,5 +1,5 @@
 <% layout("layouts/boilerplate") %>
-<body>
+
     <!-- All courses
 
     <ul>
@@ -18,13 +18,13 @@
   <section class="course-preview">
     <h2>Popular Courses</h2>
     <div class="course-grid">
-      <% for (let course of courses){%>
+      <% for (let course of allcourse){%>
         <div class="course-card">
           <img src="<%= course.image %>" alt="<%= course.name %>">
           <h3><%= course.name %></h3>
           <p><%= course.tutor %></p>
           <span class="price">₹<%= course.price %></span>
-          <a href="/courses/<%= course.id %>" class="btn-view">View Course</a>
+          <a href="/courses/<%= course._id %>" class="btn-view">View Course</a>
         </div>
       <% }%>
     </div>

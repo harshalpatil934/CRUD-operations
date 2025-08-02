@@ -3,13 +3,16 @@ const app=express();
 const mysql=require("mysql2");
 const path=require("path");
 const methodOverride = require('method-override');
-
+const ejsMate=require("ejs-mate");
 
 
 app.use(methodOverride('_method'));
 app.set("view engine","ejs");
 app.set("views",path.join(__dirname,"/views"));
 app.use(express.urlencoded({extended:true}));
+app.use(express.static(path.join(__dirname,"/public")));
+app.use(express.static("public"));
+app.engine("ejs",ejsMate);
 
 const connection =mysql.createConnection({
     host:"localhost",
@@ -58,6 +61,7 @@ app.get("/courses",(req,res)=>{
    try{
     connection.query(q,(err,courses)=>{  //result =courses
         if (err) throw err;
+        console.log(courses);
         res.render("index.ejs",{courses});
     });
    }catch(err){
@@ -70,6 +74,7 @@ app.get("/courses",(req,res)=>{
 app.get("/courses/new",(req,res)=>{
     res.render("new.ejs");
 });
+
 
 // show 
 app.get("/courses/:id",(req,res)=>{
@@ -86,6 +91,7 @@ app.get("/courses/:id",(req,res)=>{
     res.send("err");
    }
 });
+
 
 // create
 
@@ -142,6 +148,10 @@ app.delete("/courses/:id",(req,res)=>{
     console.log(err);
     res.send("err");
    }
+});
+
+app.get("/about",(req,res)=>{
+  res.render("about.ejs");
 });
 
 

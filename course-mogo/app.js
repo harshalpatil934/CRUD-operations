@@ -4,10 +4,17 @@ const mongoose=require("mongoose");
 const Course=require("./models/course.js");
 const path=require("path");
 const methodOverride=require("method-override");
+const ejsMate=require("ejs-mate");
 
 
 app.use(methodOverride("_method"));
 app.use(express.urlencoded({extended:true}));
+app.set("view engine","ejs");
+app.set("views",path.join(__dirname,"/views"));
+app.use(express.static(path.join(__dirname,"/public")));
+app.use(express.static("public"));
+app.engine("ejs",ejsMate);
+
 //views setup
 
 app.set("view engine","ejs");
@@ -29,12 +36,12 @@ main().then(()=>{
 //index route
 app.get("/courses",async (req,res)=>{
   let allcourse= await Course.find({})
-  res.render("courses/index.ejs",{allcourse});
+  res.render("index.ejs",{allcourse});
 });
 
 // new
 app.get("/courses/new",(req,res)=>{
-    res.render("courses/new.ejs");
+    res.render("new.ejs");
 });
 
 
@@ -44,7 +51,7 @@ app.get("/courses/new",(req,res)=>{
 app.get("/courses/:id",async(req,res)=>{
     let {id}=req.params;
     let course=await Course.findById(id);
-    res.render("courses/show.ejs",{course});
+    res.render("show.ejs",{course});
     
 });
 
@@ -63,7 +70,7 @@ app.post("/courses",async(req,res)=>{
 app.get("/courses/:id/edit",async(req,res)=>{
     let {id}=req.params;
     let course=await Course.findById(id);
-    res.render("courses/edit.ejs",{course});
+    res.render("edit.ejs",{course});
 });
 
 //update
@@ -84,6 +91,9 @@ app.delete("/courses/:id",async(req,res)=>{
     res.redirect("/courses");
 })
 
+app.get("/about",(req,res)=>{
+  res.render("about.ejs");
+});
 
 app.listen(8080,()=>{
     console.log("listning to 8080");

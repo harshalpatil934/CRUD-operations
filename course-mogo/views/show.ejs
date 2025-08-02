@@ -11,8 +11,8 @@
     <p class="course-description"><%= course.description %></p>
     <p class="course-price">Price: ₹<%= course.price %></p>
 
-    <a href="/courses/<%= course.id%>/edit" class="btn-enroll">edit</a>
-    <form action="/courses/<%= course.id %>?_method=DELETE" method="POST" class="form-delete">
+    <a href="/courses/<%= course._id%>/edit" class="btn-enroll">edit</a>
+    <form action="/courses/<%= course._id %>?_method=DELETE" method="POST" class="form-delete">
     <button type="submit" class="btn-delete">Delete Course</button>
     </form>
   </div>
