@@ -1,21 +1,74 @@
 <% layout("layouts/boilerplate") %>
 
-<main class="course-show">
-  <div class="course-banner">
-    <img src="<%= course.image %>" alt="<%= course.name %>">
-  </div>
+  <main class="course-show">
+    <div class="course-banner">
+      <img src="<%= course.image %>" alt="<%= course.name %>">
+    </div>
 
-  <div class="course-details">
-    <h1><%= course.name %></h1>
-    <p class="course-tutor">Instructor: <strong><%= course.tutor %></strong></p>
-    <p class="course-description"><%= course.description %></p>
-    <p class="course-price">Price: ₹<%= course.price %></p>
+    <div class="course-details">
+      <h1>
+        <%= course.name %>
+      </h1>
+      <p class="course-tutor">Instructor: <strong>
+          <%= course.tutor %>
+        </strong></p>
+      <p class="course-description">
+        <%= course.description %>
+      </p>
+      <p class="course-price">Price: ₹<%= course.price %>
+      </p>
 
-    <a href="/courses/<%= course._id%>/edit" class="btn-enroll">edit</a>
-    <form action="/courses/<%= course._id %>?_method=DELETE" method="POST" class="form-delete">
-    <button type="submit" class="btn-delete">Delete Course</button>
-    </form>
-  </div>
-</main>
+      <a href="/courses/<%= course._id%>/edit" class="btn-enroll">edit</a>
+      <form action="/courses/<%= course._id %>?_method=DELETE" method="POST" class="form-delete">
+        <button type="submit" class="btn-delete">Delete Course</button>
+      </form>
+    </div>
+    <div><br><br>
+      <hr>
+      <h4>add a review</h4>
+      <form action="/courses/<%= course._id%>/reviews" method="post" class="course-form">
+        <div class="form-group">
+
+          <label for="rating">rating</label>
+          <fieldset class="starability-slot">
+            <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="0" checked
+              aria-label="No rating." />
+            <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+            <label for="first-rate1" title="Terrible">1 star</label>
+            <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+            <label for="first-rate2" title="Not good">2 stars</label>
+            <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+            <label for="first-rate3" title="Average">3 stars</label>
+            <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+            <label for="first-rate4" title="Very good">4 stars</label>
+            <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+            <label for="first-rate5" title="Amazing">5 stars</label>
+          </fieldset>
+          <div class="form-group">
+            <label for="comment">comment</label>
+            <textarea name="review[comment]" id="comment" cols="30" row="10" required></textarea>
+          </div>
+          <button class="btn-enroll">submit</button><br><br>
+      </form>
+      <hr>
+      <section class="reviews-section">
+        <h2 class="reviews-heading">Student Reviews</h2>
+        <% for (review of course.reviews){%>
 
 
+          <div class="review-card">
+            <h4 class="review-author">👤 demoUser</h4>
+            <p class="review-text">
+              <%=review.comment%>
+            </p>
+            <div class="review-rating">
+            <p class="starability-result" data-rating="<%=review.rating%>"></p>
+            </div>
+            <form method="post" action="/courses/<%=course._id%>/reviews/<%=review._id%>?_method=DELETE">
+              <div><button class="btn-delete">delete</button></div>
+            </form>
+          </div>
+          <% } %>
+            </ul>
+    </div>
+  </main>

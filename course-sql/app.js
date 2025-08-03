@@ -4,7 +4,7 @@ const mysql=require("mysql2");
 const path=require("path");
 const methodOverride = require('method-override');
 const ejsMate=require("ejs-mate");
-
+const multer = require('multer');
 
 app.use(methodOverride('_method'));
 app.set("view engine","ejs");
@@ -21,6 +21,14 @@ const connection =mysql.createConnection({
     password:"harshal",
 
 });
+
+//image path
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'public/uploads'),
+  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+});
+
+const upload = multer({ storage });
 
 // initilizing db
 
@@ -80,34 +88,44 @@ app.get("/courses/new",(req,res)=>{
 app.get("/courses/:id",(req,res)=>{
     let {id}=req.params;
     let q=`select * from courses where id=${id}`
+    let rq='SELECT * FROM reviews WHERE course_id = ? ORDER BY created_at DESC';
+    
+      connection.query(rq, [id], (err, reviewResults) => {
+      if (err) {
+        return res.status(500).send('Error fetching reviews');
+      }
+ 
     try{
     connection.query(q,(err,course)=>{  //result =courses
         if (err) throw err;
         console.log(course)
-        res.render("show.ejs",{course:course[0]}); //array first element
+        res.render("show.ejs",{course:course[0],reviews: reviewResults }); //array first element
     });
    }catch(err){
     console.log(err);
     res.send("err");
    }
 });
-
+});
 
 // create
 
-app.post("/courses", (req, res) => {
-  const { name, description, image, price, tutor } = req.body.course;
-  const q = "INSERT INTO courses (name, description, image, price, tutor) VALUES (?, ?, ?, ?, ?)";
-  const values = [name, description, image, price, tutor];
+app.post('/courses', upload.single('image'), (req, res) => {
+  const { name, description, price, tutor } = req.body.course;
 
-  connection.query(q, values, (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.send("Error inserting data");
-    }
-    res.redirect("/courses"); // or wherever you want to redirect
+  if (!req.file) {
+    return res.status(400).send('Image upload failed.');
+  }
+
+  const imagePath = '/uploads/' + req.file.filename;
+
+  const q = `INSERT INTO courses (name, description, image, price, tutor) VALUES (?, ?, ?, ?, ?)`;
+  connection.query(q, [name, description, imagePath, price, tutor], (err, result) => {
+    if (err) return res.status(500).send('DB Error');
+    res.redirect('/courses');
   });
 });
+
 
 //new
 
@@ -122,17 +140,35 @@ app.get("/courses/:id/edit", (req, res) => {
   });
 });
 
-//update
-app.put("/courses/:id", (req, res) => {
-  const { id } = req.params;
-  const { name, description, image, price, tutor } = req.body.course;
-  const q = `UPDATE courses SET name=?, description=?, image=?, price=?, tutor=? WHERE id=?`;
 
-  connection.query(q, [name, description, image, price, tutor, id], (err, result) => {
-    if (err) return res.send("Update failed");
-    res.redirect("/courses/" + id);
+
+//update
+app.put('/courses/:id', upload.single('image'), (req, res) => {
+  const { name, description, price, tutor } = req.body;
+  const id = req.params.id;
+
+  let q, values;
+
+  // Check if a new image was uploaded
+  if (req.file) {
+    const imagePath = '/uploads/' + req.file.filename;
+    q = `UPDATE courses SET name = ?, description = ?, image = ?, price = ?, tutor = ? WHERE id = ?`;
+    values = [name, description, imagePath, price, tutor, id];
+  } else {
+    // If no new image, keep existing one
+    q = `UPDATE courses SET name = ?, description = ?, price = ?, tutor = ? WHERE id = ?`;
+    values = [name, description, price, tutor, id];
+  }
+
+  connection.query(q, values, (err, result) => {
+    if (err) {
+      console.error('SQL Error:', err);
+      return res.status(500).send('Database update failed');
+    }
+    res.redirect(`/courses/${id}`);
   });
 });
+
 
 //delete 
 app.delete("/courses/:id",(req,res)=>{
@@ -154,8 +190,55 @@ app.get("/about",(req,res)=>{
   res.render("about.ejs");
 });
 
+app.get("/search",(req,res)=>{
+  let search=[req.query.q];
+   let q=`select * from courses where name= ?`;
+   try{
+    connection.query(q,search,(err,course)=>{  //result =courses
+        if (err) throw err;
+        console.log(course)
+        res.render("show.ejs",{course:course[0]}); //array first element
+    });
+   }catch(err){
+    console.log(err);
+    res.send("err");
+   }
+  
+});
 
 
-app.listen(8080,()=>{
-    console.log("listing");
+// reviews
+
+app.post('/courses/:id/reviews', (req, res) => {
+  const courseId = req.params.id;
+  const {reviewer_name, rating, comment } = req.body;
+
+  const q = `INSERT INTO reviews (course_id,reviewer_name, rating, comment) VALUES (?,?, ?, ?)`;
+  connection.query(q, [courseId, reviewer_name, rating, comment], (err, result) => {
+    if (err) {
+      console.error('Review insert failed:', err);
+      return res.status(500).send('Error adding review.');
+    }
+    res.redirect(`/courses/${courseId}`);
+  });
+});
+
+
+// review delete
+
+app.delete('/courses/:id/reviews/:reviewId', (req, res) => {
+  const { id, reviewId } = req.params;
+
+  const q = `DELETE FROM reviews WHERE id = ? AND course_id = ?`;
+  connection.query(q, [reviewId, id], (err, result) => {
+    if (err) {
+      console.error('Review delete failed:', err);
+      return res.status(500).send('Error deleting review.');
+    }
+    res.redirect(`/courses/${id}`);
+  });
+});
+
+app.listen(3000,()=>{
+    console.log("listing t0 3000");
 });

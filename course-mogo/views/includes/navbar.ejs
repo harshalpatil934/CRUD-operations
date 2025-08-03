@@ -7,8 +7,25 @@
       <li><a href="/about">About</a></li>
     </ul>
 
-    <div class="navbar-actions">
-      <a href="/courses/new" class="btn-login">add course</a>
+  
+    <div class="navbar-center">
+    <form class="search-form" action="/search" method="GET">
+      <input type="text" name="q" placeholder="Search skills..." class="search-input" />
+      <button type="submit" class="search-btn">🔍</button>
+    </form>
     </div>
+      <div class="navbar-actions">
+      <a href="/courses/new" class="btn-login">add course</a>
+     
+    </div>
+ 
   </div>
+  <div>
+  </div>
+   <!-- <div class="navbar-center">
+    <form class="search-form" action="/search" method="GET">
+      <input type="text" name="q" placeholder="Search skills or users..." class="search-input" />
+      <button type="submit" class="search-btn">🔍</button>
+    </form>
+  </div> -->
 </nav>
